@@ -2,32 +2,33 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3'    // Name from "Manage Jenkins → Global Tool Configuration"
-        jdk 'Java21'      // Name from "Manage Jenkins → Global Tool Configuration"
+        maven 'Maven3'     // name you gave in Global Tool Config
+        jdk 'Java21'       // name you gave in Global Tool Config
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/vaibhavsuryawanshi377/Java.git', branch: 'main'
+                git branch: 'main',
+                    url: 'https://github.com/vaibhavsuryawanshi377/Java.git'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                bat 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
-                sh 'mvn package'
+                bat 'mvn package'
             }
         }
 
