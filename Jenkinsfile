@@ -8,6 +8,34 @@ pipeline {
     }
 
     stages {
+
+        // ====================
+        // 1️⃣ BUILD Stage
+        // ====================
+        stage('Build') {
+            steps {
+                echo "Building the main application..."
+                // Add your build commands here, for example Maven build
+                bat 'mvn clean package'
+            }
+        }
+
+        // ====================
+        // 2️⃣ DEPLOY Stage
+        // ====================
+        stage('Deploy') {
+            steps {
+                echo "Deploying the application..."
+                // Add your deployment commands here
+                // For example, copy files, deploy to server, start services, etc.
+                // Example:
+                // bat 'xcopy /E /Y target\\*.jar D:\\Deployments\\App\\'
+            }
+        }
+
+        // ====================
+        // 3️⃣ TEST Stage
+        // ====================
         stage('Trigger Selenium Tests') {
             steps {
                 script {
@@ -33,10 +61,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Selenium tests workflow triggered successfully!"
+            echo "✅ Pipeline completed successfully!"
         }
         failure {
-            echo "❌ Failed to trigger Selenium tests!"
+            echo "❌ Pipeline failed!"
         }
     }
 }
