@@ -1,50 +1,42 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven3'     // name you gave in Global Tool Config
-        jdk 'Java21'       // name you gave in Global Tool Config
+    environment {
+        GITHUB_TOKEN = credentials('GITHUB_PAT') // PAT stored in Jenkins
+        TEST_REPO_URL = "https://github.com/vaibhavsuryawanshi377/TestP.git"
+        TEST_REPO_BRANCH = "main"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Trigger Selenium Tests') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/vaibhavsuryawanshi377/Java.git'
-            }
-        }
+                script {
+                    echo "Cloning Selenium repo..."
+                    dir('selenium-tests') {
+                        git branch: "${TEST_REPO_BRANCH}", url: "${TEST_REPO_URL}"
+                    }
 
-        stage('Build') {
-            steps {
-                bat 'mvn clean install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat 'mvn test'
-            }
-        }
-
-        stage('Package') {
-            steps {
-                bat 'mvn package'
-            }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                    echo "Triggering GitHub Actions workflow..."
+                    withEnv(["GITHUB_TOKEN=${GITHUB_TOKEN}"]) {
+                        bat """
+                        curl -X POST ^
+                        -H "Accept: application/vnd.github.v3+json" ^
+                        -H "Authorization: token %GITHUB_TOKEN%" ^
+                        https://api.github.com/repos/vaibhavsuryawanshi377/TestP/dispatches ^
+                        -d "{\\"event_type\\": \\"run-selenium-tests\\"}"
+                        """
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo "✅ Build Successful!"
+            echo "✅ Selenium tests workflow triggered successfully!"
         }
         failure {
-            echo "❌ Build Failed!"
+            echo "❌ Failed to trigger Selenium tests!"
         }
     }
 }
